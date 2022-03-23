@@ -5,7 +5,6 @@ import 'package:moderate_project/screens/homescreen.dart';
 import 'package:moderate_project/screens/new_note.dart';
 import 'package:moderate_project/services/auth/auth_service.dart';
 import 'package:moderate_project/services/crud/notes_service.dart';
-import 'package:path/path.dart';
 
 enum MenuAction { logout }
 

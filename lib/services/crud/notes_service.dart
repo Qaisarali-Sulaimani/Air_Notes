@@ -55,7 +55,9 @@ class NoteService {
   Future<void> _ensureDbIsOpen() async {
     try {
       await open();
-    } on DatabaseAlreadyOpenException {}
+    } on DatabaseAlreadyOpenException {
+      log("Minor Error");
+    }
   }
 
   Future<DatabaseUser> getOrCreateUser({required String email}) async {

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:moderate_project/services/auth/auth_service.dart';
 import 'package:moderate_project/services/crud/notes_service.dart';

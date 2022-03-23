@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:moderate_project/mainui/homeui.dart';
+import 'package:moderate_project/mainUI/homeui.dart';
 import 'package:moderate_project/screens/homescreen.dart';
 import 'package:moderate_project/screens/login.dart';
+import 'package:moderate_project/screens/new_note.dart';
 import 'package:moderate_project/screens/register.dart';
 import 'package:moderate_project/screens/verification.dart';
 import 'package:moderate_project/services/auth/auth_service.dart';
@@ -26,6 +27,7 @@ class MyApp extends StatelessWidget {
         Verification.id: (context) => const Verification(),
         HomeScreen.id: (context) => const HomeScreen(),
         HomeUI.id: (context) => const HomeUI(),
+        NewNote.id: (context) => const NewNote(),
       },
     );
   }

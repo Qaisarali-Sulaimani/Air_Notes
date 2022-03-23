@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:sqflite/sqflite.dart';
@@ -32,8 +33,32 @@ const createNoteTable = '''CREATE TABLE "note" (
 class NoteService {
   Database? _db;
 
-  Future<DatabaseNote> updateNote(
-      {required DatabaseNote note, required String text}) async {
+  List<DatabaseNote> _notes = [];
+
+  final _notesStreamController =
+      StreamController<List<DatabaseNote>>.broadcast();
+
+  Future<DatabaseUser> getOrCreateUser({required String email}) async {
+    try {
+      final myuser = await getuser(email: email);
+      return myuser;
+    } on CouldNotFindUser {
+      return await createuser(email: email);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> cacheNotes() async {
+    final notes = await getAllNotes();
+    _notes = notes.toList();
+    _notesStreamController.add(_notes);
+  }
+
+  Future<DatabaseNote> updateNote({
+    required DatabaseNote note,
+    required String text,
+  }) async {
     // check
     final db = _getDatabaseOrThrow();
     await getNote(id: note.id);
@@ -47,7 +72,12 @@ class NoteService {
       throw CouldNotUpdateNote();
     }
 
-    return await getNote(id: note.id);
+    final updateNote = await getNote(id: note.id);
+    _notes.removeWhere((element) => element.id == note.id);
+    _notes.add(updateNote);
+    _notesStreamController.add(_notes);
+
+    return updateNote;
   }
 
   Future<Iterable<DatabaseNote>> getAllNotes() async {
@@ -74,6 +104,8 @@ class NoteService {
 
   Future<int> deleteAllNotes() async {
     final db = _getDatabaseOrThrow();
+    _notes = [];
+    _notesStreamController.add(_notes);
     return await db.delete(noteTable);
   }
 
@@ -89,6 +121,9 @@ class NoteService {
     if (count == 0) {
       throw CouldNotDeleteNote();
     }
+
+    _notes.removeWhere((element) => element.id == id);
+    _notesStreamController.add(_notes);
   }
 
   Future<DatabaseNote> createNote({required DatabaseUser owner}) async {
@@ -106,8 +141,17 @@ class NoteService {
       isSyncColumn: 1,
     });
 
-    return DatabaseNote(
-        id: noteid, userId: owner.id, text: '', isSyncWithCloud: true);
+    final note = DatabaseNote(
+      id: noteid,
+      userId: owner.id,
+      text: '',
+      isSyncWithCloud: true,
+    );
+
+    _notes.add(note);
+    _notesStreamController.add(_notes);
+
+    return note;
   }
 
   Future<DatabaseUser> getuser({required String email}) async {
@@ -189,6 +233,7 @@ class NoteService {
       // create user and note table;
       await db.execute(createUsertable);
       await db.execute(createNoteTable);
+      await cacheNotes();
       // end;
 
     } on MissingPlatformDirectoryException {

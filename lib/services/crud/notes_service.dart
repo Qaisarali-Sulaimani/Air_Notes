@@ -21,7 +21,7 @@ const createUsertable = '''CREATE TABLE IF NOT EXISTS "user" (
                           PRIMARY KEY("id" AUTOINCREMENT)
                           );''';
 
-const createNoteTable = '''CREATE TABLE "note" (
+const createNoteTable = '''CREATE TABLE IF NOT EXISTS "note" (
                           "id"	INTEGER NOT NULL,
                           "user_id"	INTEGER NOT NULL,
                           "text"	TEXT NOT NULL,
@@ -32,6 +32,7 @@ const createNoteTable = '''CREATE TABLE "note" (
 
 class NoteService {
   Database? _db;
+  late DatabaseUser _user;
 
   static final NoteService _shared = NoteService._sharedInstance();
 
@@ -65,9 +66,14 @@ class NoteService {
 
     try {
       final myuser = await getuser(email: email);
+      _user = myuser;
+      await cacheNotes();
       return myuser;
     } on CouldNotFindUser {
-      return await createuser(email: email);
+      final myuser = await createuser(email: email);
+      _user = myuser;
+      await cacheNotes();
+      return myuser;
     } catch (e) {
       rethrow;
     }
@@ -89,10 +95,15 @@ class NoteService {
     final db = _getDatabaseOrThrow();
     await getNote(id: note.id);
 
-    final updated = await db.update(noteTable, {
-      textColumn: text,
-      isSyncColumn: 0,
-    });
+    final updated = await db.update(
+      noteTable,
+      {
+        textColumn: text,
+        isSyncColumn: 0,
+      },
+      where: 'id=?',
+      whereArgs: [note.id],
+    );
 
     if (updated == 0) {
       throw CouldNotUpdateNote();
@@ -110,7 +121,8 @@ class NoteService {
     await _ensureDbIsOpen();
 
     final db = _getDatabaseOrThrow();
-    final notes = await db.query(noteTable);
+    final notes = await db
+        .rawQuery('select * from note where $userIdColumn = ${_user.id}');
 
     return notes.map((note) => DatabaseNote.fromRow(note));
   }
@@ -274,7 +286,6 @@ class NoteService {
       // create user and note table;
       await db.execute(createUsertable);
       await db.execute(createNoteTable);
-      await cacheNotes();
       // end;
 
     } on MissingPlatformDirectoryException {

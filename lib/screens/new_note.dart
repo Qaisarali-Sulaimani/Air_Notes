@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:moderate_project/services/auth/auth_service.dart';
 import 'package:moderate_project/services/crud/notes_service.dart';
+import 'package:moderate_project/utilities/genericArgument.dart';
 
 class NewNote extends StatefulWidget {
   const NewNote({Key? key}) : super(key: key);
@@ -15,7 +16,15 @@ class _NewNoteState extends State<NewNote> {
   late final NoteService _noteService;
   late final TextEditingController _controller;
 
-  Future<DatabaseNote> createNote() async {
+  Future<DatabaseNote> createOrGetExisting(BuildContext context) async {
+    final widgetNote = context.getArgument<DatabaseNote>();
+
+    if (widgetNote != null) {
+      _note = widgetNote;
+      _controller.text = widgetNote.text;
+      return widgetNote;
+    }
+
     if (_note != null) {
       return _note!;
     }
@@ -75,12 +84,14 @@ class _NewNoteState extends State<NewNote> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("New Note"),
+        title: const Text(
+          "New Note",
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: FutureBuilder(
-          future: createNote(),
+          future: createOrGetExisting(context),
           builder: (context, snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.done:

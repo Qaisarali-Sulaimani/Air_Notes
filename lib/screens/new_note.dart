@@ -87,6 +87,7 @@ class _NewNoteState extends State<NewNote> {
                 _note = snapshot.hasData ? snapshot.data as DatabaseNote : null;
                 _setupTextControllerListener();
                 return TextField(
+                  autofocus: true,
                   controller: _controller,
                   keyboardType: TextInputType.multiline,
                   enableSuggestions: true,

@@ -20,7 +20,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
-      initialRoute: HomeScreen.id,
+      initialRoute: AuthService.fromFirebase().currentuser != null
+          ? HomeUI.id
+          : HomeScreen.id,
       routes: {
         RegisterPage.id: (context) => const RegisterPage(),
         LoginPage.id: (context) => const LoginPage(),

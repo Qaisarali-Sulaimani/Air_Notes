@@ -56,7 +56,7 @@ class NoteService {
     try {
       await open();
     } on DatabaseAlreadyOpenException {
-      log("Minor Error");
+      log("Already Open Database");
     }
   }
 

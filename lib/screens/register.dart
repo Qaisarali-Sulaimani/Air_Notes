@@ -77,15 +77,20 @@ class _RegisterPageState extends State<RegisterPage> {
                     await AuthService.fromFirebase().sendEmailverification();
                     Navigator.pushNamed(context, Verification.id);
                   } on WeakPasswordAuthException {
-                    await showError(context, "Weak Password!!");
+                    await showErrorDialog(
+                        context: context, text: "Weak Password!!");
                   } on EmailAlreadyInUseAuthException {
-                    await showError(context, "Email already in use!!");
+                    await showErrorDialog(
+                        context: context, text: "Email already in use!!");
                   } on InValidEmailAuthException {
-                    await showError(context, "Email is invalid!!");
+                    await showErrorDialog(
+                        context: context, text: "Email is invalid!!");
                   } on GenericAuthException {
-                    await showError(context, "Registration Error!!");
+                    await showErrorDialog(
+                        context: context, text: "Registration Error!!");
                   } catch (e) {
-                    await showError(context, "Something bad happened!!");
+                    await showErrorDialog(
+                        context: context, text: "Something bad happened!!");
                   }
                   setState(() {
                     show = false;

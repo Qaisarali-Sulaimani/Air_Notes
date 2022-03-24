@@ -83,13 +83,17 @@ class _LoginPageState extends State<LoginPage> {
                           context, HomeUI.id, (route) => false);
                     }
                   } on UserNotFoundAuthException {
-                    await showError(context, "User not found!!");
+                    await showErrorDialog(
+                        context: context, text: "User not found!!");
                   } on WrongPasswordAuthException {
-                    await showError(context, "Wrong Credentials!!");
+                    await showErrorDialog(
+                        context: context, text: "Wrong Credentials!!");
                   } on GenericAuthException {
-                    await showError(context, "Authentication Error!!");
+                    await showErrorDialog(
+                        context: context, text: "Authentication Error!!");
                   } catch (e) {
-                    await showError(context, "Semething bad happened!!");
+                    await showErrorDialog(
+                        context: context, text: "Something bad happened");
                   }
                   setState(() {
                     show = !show;

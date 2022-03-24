@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:moderate_project/services/crud/notes_service.dart';
+
+typedef DialogOptionBuilder<T> = Map<String, T?> Function();
 
 class MyButton extends StatelessWidget {
   final Function() onPress;
@@ -32,56 +35,103 @@ class MyButton extends StatelessWidget {
   }
 }
 
-Future<bool> showLogoutDialog(BuildContext context) {
-  return showDialog<bool>(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text("Sign Out"),
-        content: const Text("Are you sure you want to sign out?"),
-        actions: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              MyButton(
-                onPress: () {
-                  Navigator.of(context).pop(true);
-                },
-                text: "Log out",
-                normal: false,
+class MyListView extends StatelessWidget {
+  final List<DatabaseNote> list;
+
+  const MyListView({Key? key, required this.list}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: list.length,
+      itemBuilder: (context, index) {
+        if (list[index].text.isNotEmpty) {
+          return Card(
+            child: ListTile(
+              leading: Text(
+                list[index].id.toString(),
               ),
-              MyButton(
-                onPress: () {
-                  Navigator.of(context).pop(false);
-                },
-                text: "Cancel",
-                normal: false,
+              title: Text(
+                list[index].text,
+                maxLines: 1,
+                softWrap: true,
+                overflow: TextOverflow.ellipsis,
               ),
-            ],
-          ),
-        ],
-      );
-    },
-  ).then((value) => value ?? false);
+              enableFeedback: true,
+              trailing: IconButton(
+                onPressed: () async {
+                  final shouldDelete = await showGenericDialog(
+                    context: context,
+                    title: "Delete Note",
+                    content: "Do you really want to delete this note?",
+                    optionBuilder: () {
+                      return {
+                        "Delete": true,
+                        "Cancel": false,
+                      };
+                    },
+                  );
+
+                  if (shouldDelete) {
+                    NoteService().deleteNote(id: list[index].id);
+                  }
+                },
+                icon: const Icon(Icons.delete),
+              ),
+            ),
+          );
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
+      },
+    );
+  }
 }
 
-Future<void> showError(BuildContext context, String text) {
-  return showDialog(
+Future<T?> showGenericDialog<T>({
+  required BuildContext context,
+  required String title,
+  required String content,
+  required DialogOptionBuilder optionBuilder,
+}) {
+  final options = optionBuilder();
+  return showDialog<T>(
     context: context,
     builder: (context) {
       return AlertDialog(
-        title: const Text("An error occured!!"),
-        content: Text(text),
-        actions: [
-          MyButton(
+        title: Text(title),
+        content: Text(content),
+        actions: options.keys.map((optionTile) {
+          final value = options[optionTile];
+          return MyButton(
             onPress: () {
-              Navigator.of(context).pop();
+              if (value != null) {
+                Navigator.of(context).pop(value);
+              } else {
+                Navigator.of(context).pop();
+              }
             },
-            text: "OK",
-            normal: false,
-          ),
-        ],
+            text: optionTile,
+            normal: true,
+          );
+        }).toList(),
       );
+    },
+  );
+}
+
+Future<void> showErrorDialog({
+  required BuildContext context,
+  required String text,
+}) {
+  return showGenericDialog(
+    context: context,
+    title: "An Error Occured",
+    content: text,
+    optionBuilder: () {
+      return {
+        'OK': null,
+      };
     },
   );
 }

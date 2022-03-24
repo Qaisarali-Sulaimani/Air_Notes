@@ -47,7 +47,17 @@ class _HomeUIState extends State<HomeUI> {
             onSelected: (value) async {
               switch (value) {
                 case MenuAction.logout:
-                  final shouldLog = await showLogoutDialog(context);
+                  final shouldLog = await showGenericDialog(
+                    context: context,
+                    title: "Sign Out",
+                    content: "Do you really want to log out?",
+                    optionBuilder: () {
+                      return {
+                        'Log Out': true,
+                        'Cancel': false,
+                      };
+                    },
+                  );
                   log(shouldLog.toString());
 
                   if (shouldLog) {
@@ -84,20 +94,8 @@ class _HomeUIState extends State<HomeUI> {
                       case ConnectionState.active:
                         if (snapshot.hasData) {
                           final list = snapshot.data as List<DatabaseNote>;
-                          return ListView.builder(
-                            itemCount: list.length,
-                            itemBuilder: (context, index) {
-                              return Card(
-                                child: ListTile(
-                                  leading: Text(
-                                    list[index].id.toString(),
-                                  ),
-                                  title: Text(
-                                    list[index].text,
-                                  ),
-                                ),
-                              );
-                            },
+                          return MyListView(
+                            list: list,
                           );
                         } else {
                           return const CircularProgressIndicator();

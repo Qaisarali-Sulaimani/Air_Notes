@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:moderate_project/constants.dart';
-import 'package:moderate_project/mainui/homeui.dart';
-import 'package:moderate_project/services/auth/auth_exceptions.dart';
-import 'package:moderate_project/screens/verification.dart';
-import 'package:moderate_project/services/auth/auth_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import 'package:moderate_project/constants.dart';
+import 'package:moderate_project/services/auth/auth_exceptions.dart';
+import 'package:moderate_project/services/bloc/auth_event.dart';
+import '../services/bloc/auth_bloc.dart';
+import '../services/bloc/auth_state.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -15,9 +16,9 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  bool show = false;
   late final TextEditingController _email;
   late final TextEditingController _password;
+  bool show = false;
 
   @override
   void initState() {
@@ -35,74 +36,67 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Login"),
-      ),
-      body: ModalProgressHUD(
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) async {
+        if (state is AuthStateLoggingIn) {
+          if (state.exception is UserNotFoundAuthException) {
+            await showErrorDialog(context: context, text: "User not found!!");
+          } else if (state.exception is WrongPasswordAuthException) {
+            await showErrorDialog(
+                context: context, text: "Wrong Credentials!!");
+          } else if (state.exception is GenericAuthException) {
+            await showErrorDialog(
+                context: context, text: "Authentication Error!!");
+          }
+        }
+
+        setState(() {
+          show = false;
+        });
+      },
+      child: ModalProgressHUD(
         inAsyncCall: show,
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            children: [
-              TextField(
-                controller: _email,
-                autocorrect: false,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  hintText: "Enter Email",
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text("Login"),
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _email,
+                  autocorrect: false,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                    hintText: "Enter Email",
+                  ),
                 ),
-              ),
-              TextField(
-                controller: _password,
-                autocorrect: false,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  hintText: "Enter Password",
+                TextField(
+                  controller: _password,
+                  autocorrect: false,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    hintText: "Enter Password",
+                  ),
                 ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              MyButton(
-                onPress: () async {
-                  setState(() {
-                    show = !show;
-                  });
-                  try {
-                    await AuthService.fromFirebase()
-                        .logIn(email: _email.text, password: _password.text);
-
-                    final nuser = AuthService.fromFirebase().currentuser;
-
-                    if (!nuser!.isEmailverified) {
-                      await AuthService.fromFirebase().sendEmailverification();
-                      Navigator.pushNamed(context, Verification.id);
-                    } else {
-                      Navigator.pushNamedAndRemoveUntil(
-                          context, HomeUI.id, (route) => false);
-                    }
-                  } on UserNotFoundAuthException {
-                    await showErrorDialog(
-                        context: context, text: "User not found!!");
-                  } on WrongPasswordAuthException {
-                    await showErrorDialog(
-                        context: context, text: "Wrong Credentials!!");
-                  } on GenericAuthException {
-                    await showErrorDialog(
-                        context: context, text: "Authentication Error!!");
-                  } catch (e) {
-                    await showErrorDialog(
-                        context: context, text: "Something bad happened");
-                  }
-                  setState(() {
-                    show = !show;
-                  });
-                },
-                text: "Login",
-                normal: true,
-              ),
-            ],
+                const SizedBox(
+                  height: 10,
+                ),
+                MyButton(
+                  onPress: () {
+                    setState(() {
+                      show = true;
+                    });
+                    context
+                        .read<AuthBloc>()
+                        .add(AuthEventLogin(_email.text, _password.text));
+                  },
+                  text: "Login",
+                  normal: true,
+                ),
+              ],
+            ),
           ),
         ),
       ),

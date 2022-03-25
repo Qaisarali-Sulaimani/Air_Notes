@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moderate_project/constants.dart';
-import 'package:moderate_project/screens/login.dart';
-import 'package:moderate_project/services/auth/auth_service.dart';
+import 'package:moderate_project/services/bloc/auth_event.dart';
+
+import '../services/bloc/auth_bloc.dart';
 
 class Verification extends StatefulWidget {
   const Verification({Key? key}) : super(key: key);
@@ -44,7 +46,9 @@ class _VerificationState extends State<Verification> {
               ),
               MyButton(
                 onPress: () {
-                  AuthService.fromFirebase().sendEmailverification();
+                  context
+                      .read<AuthBloc>()
+                      .add(const AuthEventSendEmailverification());
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(
@@ -65,8 +69,7 @@ class _VerificationState extends State<Verification> {
               ),
               MyButton(
                 onPress: () {
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, LoginPage.id, (route) => false);
+                  context.read<AuthBloc>().add(const AuthEventShouldLogin());
                 },
                 text: "Restart",
                 normal: true,

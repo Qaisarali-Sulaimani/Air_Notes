@@ -1,9 +1,10 @@
-import 'dart:developer' show log;
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moderate_project/constants.dart';
-import 'package:moderate_project/screens/homescreen.dart';
 import 'package:moderate_project/screens/new_note.dart';
 import 'package:moderate_project/services/auth/auth_service.dart';
+import 'package:moderate_project/services/bloc/auth_bloc.dart';
+import 'package:moderate_project/services/bloc/auth_event.dart';
 import 'package:moderate_project/services/cloud/cloud_note.dart';
 import 'package:moderate_project/services/cloud/cloud_service.dart';
 import 'list_view.dart';
@@ -60,14 +61,10 @@ class _HomeUIState extends State<HomeUI> {
                       };
                     },
                   );
-                  log(shouldLog.toString());
 
                   if (shouldLog) {
-                    AuthService.fromFirebase().logOut();
-                    Navigator.pushNamedAndRemoveUntil(
-                        context, HomeScreen.id, (route) => false);
+                    context.read<AuthBloc>().add(const AuthEventLogout());
                   }
-                  break;
               }
             },
             itemBuilder: (context) {
@@ -95,7 +92,7 @@ class _HomeUIState extends State<HomeUI> {
                     list: list,
                   );
                 } else {
-                  return const CircularProgressIndicator();
+                  return const Center(child: CircularProgressIndicator());
                 }
               default:
                 return const Center(child: CircularProgressIndicator());

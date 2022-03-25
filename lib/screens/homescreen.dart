@@ -2,9 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moderate_project/constants.dart';
-import 'package:moderate_project/screens/login.dart';
-import 'package:moderate_project/screens/register.dart';
+import 'package:moderate_project/services/bloc/auth_event.dart';
+
+import '../services/bloc/auth_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -77,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             MyButton(
               onPress: () {
-                Navigator.pushNamed(context, RegisterPage.id);
+                context.read<AuthBloc>().add(const AuthEventShouldRegister());
               },
               text: "Register",
               normal: true,
@@ -87,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             MyButton(
               onPress: () {
-                Navigator.pushNamed(context, LoginPage.id);
+                context.read<AuthBloc>().add(const AuthEventShouldLogin());
               },
               text: "Login",
               normal: true,

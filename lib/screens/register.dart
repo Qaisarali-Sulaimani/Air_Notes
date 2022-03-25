@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'dart:developer' show log;
-import 'package:moderate_project/constants.dart';
-import 'package:moderate_project/screens/verification.dart';
-import 'package:moderate_project/services/auth/auth_service.dart';
-import 'package:moderate_project/services/auth/auth_exceptions.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import 'package:moderate_project/constants.dart';
+import 'package:moderate_project/services/auth/auth_exceptions.dart';
+import 'package:moderate_project/services/bloc/auth_event.dart';
+
+import '../services/bloc/auth_bloc.dart';
+import '../services/bloc/auth_state.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -15,9 +17,9 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  bool show = false;
   late final TextEditingController _email;
   late final TextEditingController _password;
+  bool show = false;
 
   @override
   void initState() {
@@ -35,71 +37,69 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Register"),
-      ),
-      body: ModalProgressHUD(
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) async {
+        if (state is AuthStateRegistering) {
+          if (state.exception is WeakPasswordAuthException) {
+            await showErrorDialog(context: context, text: "Weak Password!!");
+          } else if (state.exception is EmailAlreadyInUseAuthException) {
+            await showErrorDialog(
+                context: context, text: "Email already in use!!");
+          } else if (state.exception is InValidEmailAuthException) {
+            await showErrorDialog(context: context, text: "Email is invalid!!");
+          } else if (state.exception is GenericAuthException) {
+            await showErrorDialog(
+                context: context, text: "Registration Error!!");
+          }
+        }
+        setState(() {
+          show = false;
+        });
+      },
+      child: ModalProgressHUD(
         inAsyncCall: show,
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            children: [
-              TextField(
-                controller: _email,
-                autocorrect: false,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  hintText: "Enter Email",
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text("Register"),
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _email,
+                  autocorrect: false,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                    hintText: "Enter Email",
+                  ),
                 ),
-              ),
-              TextField(
-                controller: _password,
-                autocorrect: false,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  hintText: "Enter Password",
+                TextField(
+                  controller: _password,
+                  autocorrect: false,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    hintText: "Enter Password",
+                  ),
                 ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              MyButton(
-                onPress: () async {
-                  setState(() {
-                    show = true;
-                  });
-                  try {
-                    final user = await AuthService.fromFirebase().createUser(
-                        email: _email.text, password: _password.text);
-                    log(user.toString());
+                const SizedBox(
+                  height: 10,
+                ),
+                MyButton(
+                  onPress: () {
+                    setState(() {
+                      show = true;
+                    });
 
-                    await AuthService.fromFirebase().sendEmailverification();
-                    Navigator.pushNamed(context, Verification.id);
-                  } on WeakPasswordAuthException {
-                    await showErrorDialog(
-                        context: context, text: "Weak Password!!");
-                  } on EmailAlreadyInUseAuthException {
-                    await showErrorDialog(
-                        context: context, text: "Email already in use!!");
-                  } on InValidEmailAuthException {
-                    await showErrorDialog(
-                        context: context, text: "Email is invalid!!");
-                  } on GenericAuthException {
-                    await showErrorDialog(
-                        context: context, text: "Registration Error!!");
-                  } catch (e) {
-                    await showErrorDialog(
-                        context: context, text: "Something bad happened!!");
-                  }
-                  setState(() {
-                    show = false;
-                  });
-                },
-                text: "Register",
-                normal: true,
-              ),
-            ],
+                    context
+                        .read<AuthBloc>()
+                        .add(AuthEventRegister(_email.text, _password.text));
+                  },
+                  text: "Register",
+                  normal: true,
+                ),
+              ],
+            ),
           ),
         ),
       ),

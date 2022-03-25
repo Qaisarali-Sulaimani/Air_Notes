@@ -4,9 +4,9 @@ import 'package:moderate_project/constants.dart';
 import 'package:moderate_project/screens/homescreen.dart';
 import 'package:moderate_project/screens/new_note.dart';
 import 'package:moderate_project/services/auth/auth_service.dart';
-import 'package:moderate_project/services/crud/notes_service.dart';
-
-import 'listView.dart';
+import 'package:moderate_project/services/cloud/cloud_note.dart';
+import 'package:moderate_project/services/cloud/cloud_service.dart';
+import 'list_view.dart';
 
 enum MenuAction { logout }
 
@@ -19,15 +19,15 @@ class HomeUI extends StatefulWidget {
 }
 
 class _HomeUIState extends State<HomeUI> {
-  late final NoteService _noteService;
+  late final FirebaseCloudStorage _noteService;
 
-  String get userEmail {
-    return AuthService.fromFirebase().currentuser!.email!;
+  String get userId {
+    return AuthService.fromFirebase().currentuser!.id;
   }
 
   @override
   void initState() {
-    _noteService = NoteService();
+    _noteService = FirebaseCloudStorage();
     super.initState();
   }
 
@@ -83,32 +83,22 @@ class _HomeUIState extends State<HomeUI> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(10),
-        child: FutureBuilder(
-          future: _noteService.getOrCreateUser(email: userEmail),
+        child: StreamBuilder(
+          stream: _noteService.allNotes(owneruserId: userId),
           builder: (context, snapshot) {
             switch (snapshot.connectionState) {
-              case ConnectionState.done:
-                return StreamBuilder(
-                  stream: _noteService.allNotes,
-                  builder: (context, snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                      case ConnectionState.active:
-                        if (snapshot.hasData) {
-                          final list = snapshot.data as List<DatabaseNote>;
-                          return MyListView(
-                            list: list,
-                          );
-                        } else {
-                          return const CircularProgressIndicator();
-                        }
-                      default:
-                        return const CircularProgressIndicator();
-                    }
-                  },
-                );
+              case ConnectionState.waiting:
+              case ConnectionState.active:
+                if (snapshot.hasData) {
+                  final list = snapshot.data as Iterable<CloudNote>;
+                  return MyListView(
+                    list: list,
+                  );
+                } else {
+                  return const CircularProgressIndicator();
+                }
               default:
-                return const CircularProgressIndicator();
+                return const Center(child: CircularProgressIndicator());
             }
           },
         ),

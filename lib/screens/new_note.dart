@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:moderate_project/constants.dart';
 import 'package:moderate_project/services/auth/auth_service.dart';
-import 'package:moderate_project/services/crud/notes_service.dart';
-import 'package:moderate_project/utilities/genericArgument.dart';
+import 'package:moderate_project/services/cloud/cloud_note.dart';
+import 'package:moderate_project/services/cloud/cloud_service.dart';
+import 'package:moderate_project/utilities/generic_argument.dart';
+import 'package:share_plus/share_plus.dart';
 
 class NewNote extends StatefulWidget {
   const NewNote({Key? key}) : super(key: key);
@@ -12,12 +15,12 @@ class NewNote extends StatefulWidget {
 }
 
 class _NewNoteState extends State<NewNote> {
-  DatabaseNote? _note;
-  late final NoteService _noteService;
+  CloudNote? _note;
+  late final FirebaseCloudStorage _noteService;
   late final TextEditingController _controller;
 
-  Future<DatabaseNote> createOrGetExisting(BuildContext context) async {
-    final widgetNote = context.getArgument<DatabaseNote>();
+  Future<CloudNote> createOrGetExisting(BuildContext context) async {
+    final widgetNote = context.getArgument<CloudNote>();
 
     if (widgetNote != null) {
       _note = widgetNote;
@@ -28,16 +31,16 @@ class _NewNoteState extends State<NewNote> {
     if (_note != null) {
       return _note!;
     }
-    final email = AuthService.fromFirebase().currentuser!.email!;
-    final user = await _noteService.getuser(email: email);
-    return await _noteService.createNote(owner: user);
+
+    final userId = AuthService.fromFirebase().currentuser!.id;
+    return _note = await _noteService.createNewNote(owneruserId: userId);
   }
 
   void _deleteNoteIfTextEmpty() async {
     final note = _note;
 
     if (_controller.text.isEmpty && note != null) {
-      await _noteService.deleteNote(id: note.id);
+      await _noteService.deleteNote(documentId: note.documentId);
     }
   }
 
@@ -45,7 +48,8 @@ class _NewNoteState extends State<NewNote> {
     final note = _note;
 
     if (_controller.text.isNotEmpty && note != null) {
-      await _noteService.updateNote(note: note, text: _controller.text);
+      await _noteService.updateNote(
+          documentId: note.documentId, text: _controller.text);
     }
   }
 
@@ -56,8 +60,8 @@ class _NewNoteState extends State<NewNote> {
       return;
     }
 
-    final text = _controller.text;
-    await _noteService.updateNote(note: note, text: text);
+    await _noteService.updateNote(
+        documentId: note.documentId, text: _controller.text);
   }
 
   void _setupTextControllerListener() {
@@ -68,7 +72,7 @@ class _NewNoteState extends State<NewNote> {
   @override
   void initState() {
     _controller = TextEditingController();
-    _noteService = NoteService();
+    _noteService = FirebaseCloudStorage();
     super.initState();
   }
 
@@ -87,6 +91,20 @@ class _NewNoteState extends State<NewNote> {
         title: const Text(
           "New Note",
         ),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              if (_controller.text.isEmpty) {
+                await showCantShareEmptyNoteDialog(context);
+              } else {
+                Share.share(_controller.text);
+              }
+            },
+            icon: const Icon(
+              Icons.share,
+            ),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
@@ -95,19 +113,23 @@ class _NewNoteState extends State<NewNote> {
           builder: (context, snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.done:
-                _note = snapshot.hasData ? snapshot.data as DatabaseNote : null;
+                _note = snapshot.hasData ? snapshot.data as CloudNote : null;
                 _setupTextControllerListener();
                 return TextField(
                   autofocus: true,
                   controller: _controller,
                   keyboardType: TextInputType.multiline,
                   enableSuggestions: true,
+                  style: const TextStyle(
+                    letterSpacing: 1.3,
+                    fontSize: 17,
+                  ),
                   maxLines: null,
                   decoration:
                       const InputDecoration(hintText: "Enter Note Details ..."),
                 );
               default:
-                return const CircularProgressIndicator();
+                return const Center(child: CircularProgressIndicator());
             }
           },
         ),

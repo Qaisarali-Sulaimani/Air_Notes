@@ -81,3 +81,16 @@ Future<void> showErrorDialog({
     },
   );
 }
+
+Future<void> showCantShareEmptyNoteDialog(BuildContext context) {
+  return showGenericDialog(
+    context: context,
+    title: "Sharing",
+    content: "You cannot share an empty note!",
+    optionBuilder: () {
+      return {
+        'OK': null,
+      };
+    },
+  );
+}

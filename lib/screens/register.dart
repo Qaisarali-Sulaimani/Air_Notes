@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:moderate_project/constants.dart';
 import 'package:moderate_project/services/auth/auth_exceptions.dart';
 import 'package:moderate_project/services/bloc/auth_event.dart';
@@ -19,7 +18,6 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   late final TextEditingController _email;
   late final TextEditingController _password;
-  bool show = false;
 
   @override
   void initState() {
@@ -52,54 +50,44 @@ class _RegisterPageState extends State<RegisterPage> {
                 context: context, text: "Registration Error!!");
           }
         }
-        setState(() {
-          show = false;
-        });
       },
-      child: ModalProgressHUD(
-        inAsyncCall: show,
-        child: Scaffold(
-          appBar: AppBar(
-            title: const Text("Register"),
-          ),
-          body: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              children: [
-                TextField(
-                  controller: _email,
-                  autocorrect: false,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    hintText: "Enter Email",
-                  ),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Register"),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            children: [
+              TextField(
+                controller: _email,
+                autocorrect: false,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  hintText: "Enter Email",
                 ),
-                TextField(
-                  controller: _password,
-                  autocorrect: false,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    hintText: "Enter Password",
-                  ),
+              ),
+              TextField(
+                controller: _password,
+                autocorrect: false,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  hintText: "Enter Password",
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
-                MyButton(
-                  onPress: () {
-                    setState(() {
-                      show = true;
-                    });
-
-                    context
-                        .read<AuthBloc>()
-                        .add(AuthEventRegister(_email.text, _password.text));
-                  },
-                  text: "Register",
-                  normal: true,
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              MyButton(
+                onPress: () {
+                  context
+                      .read<AuthBloc>()
+                      .add(AuthEventRegister(_email.text, _password.text));
+                },
+                text: "Register",
+                normal: true,
+              ),
+            ],
           ),
         ),
       ),

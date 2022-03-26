@@ -94,3 +94,15 @@ Future<void> showCantShareEmptyNoteDialog(BuildContext context) {
     },
   );
 }
+
+Future<void> showPasswordResetSentDialog(BuildContext context) {
+  return showGenericDialog(
+    context: context,
+    title: 'Password Reset',
+    content:
+        "We have sent you a password reset link. Please check you email for more information",
+    optionBuilder: () => {
+      'OK': null,
+    },
+  );
+}

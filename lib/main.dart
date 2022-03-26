@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moderate_project/mainUI/homeui.dart';
+import 'package:moderate_project/screens/forgot_password_view.dart';
 import 'package:moderate_project/screens/homescreen.dart';
 import 'package:moderate_project/screens/login.dart';
 import 'package:moderate_project/screens/new_note.dart';
@@ -10,6 +11,7 @@ import 'package:moderate_project/services/auth/firebase_auth_provider.dart';
 import 'package:moderate_project/services/bloc/auth_bloc.dart';
 import 'package:moderate_project/services/bloc/auth_event.dart';
 import 'package:moderate_project/services/bloc/auth_state.dart';
+import 'package:moderate_project/utilities/loading/loading_screen.dart';
 
 void main() async {
   runApp(const MyApp());
@@ -47,7 +49,14 @@ class HomePageState extends State<HomePage> {
     // initial
     context.read<AuthBloc>().add(const AuthEventInitialize());
 
-    return BlocBuilder<AuthBloc, AuthState>(
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state.isLoading) {
+          LoadingScreen().show(context: context, text: state.text);
+        } else {
+          LoadingScreen().hide();
+        }
+      },
       builder: (context, state) {
         if (state is AuthStateLoggedIn) {
           return const HomeUI();
@@ -59,6 +68,8 @@ class HomePageState extends State<HomePage> {
           return const RegisterPage();
         } else if (state is AuthStateLoggingIn) {
           return const LoginPage();
+        } else if (state is AuthStateForgotPassword) {
+          return const ForgotPassword();
         } else {
           return const Scaffold(
             body: CircularProgressIndicator(),

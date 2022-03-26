@@ -56,11 +56,8 @@ class _HomeScreenState extends State<HomeScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                SizedBox(
-                  child: Image.asset('images/logo.png'),
-                  height: 60.0,
-                ),
                 TyperAnimatedTextKit(
                   isRepeatingAnimation: false,
                   curve: Curves.linear,

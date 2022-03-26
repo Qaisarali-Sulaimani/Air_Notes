@@ -23,6 +23,11 @@ class AuthEventSendEmailverification extends AuthEvent {
   const AuthEventSendEmailverification();
 }
 
+class AuthEventForgotPassword extends AuthEvent {
+  final String? email;
+  const AuthEventForgotPassword(this.email);
+}
+
 class AuthEventRegister extends AuthEvent {
   final String email;
   final String password;

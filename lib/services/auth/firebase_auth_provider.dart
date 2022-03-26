@@ -101,4 +101,13 @@ class FirebaseAuthProvider implements AuthProvider {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
   }
+
+  @override
+  Future<void> sendPasswordReset({required String email}) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+    } catch (_) {
+      throw GenericAuthException();
+    }
+  }
 }

@@ -136,6 +136,7 @@ class _HomeUIState extends State<HomeUI> {
                         fontStyle: FontStyle.italic,
                         fontWeight: FontWeight.w400,
                         letterSpacing: 1.2,
+                        color: Colors.black,
                       ),
                     ),
                   );
@@ -149,6 +150,7 @@ class _HomeUIState extends State<HomeUI> {
                       fontStyle: FontStyle.italic,
                       fontWeight: FontWeight.w400,
                       letterSpacing: 1.2,
+                      color: Colors.black,
                     ),
                   ),
                 );

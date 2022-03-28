@@ -26,7 +26,6 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.system,
       home: BlocProvider<AuthBloc>(
         create: (context) => AuthBloc(FirebaseAuthProvider()),
         child: const HomePage(),

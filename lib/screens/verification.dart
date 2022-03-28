@@ -63,6 +63,7 @@ class _VerificationState extends State<Verification> {
                 },
                 text: "Resend",
                 normal: true,
+                context: context,
               ),
               const SizedBox(
                 height: 10,
@@ -73,6 +74,7 @@ class _VerificationState extends State<Verification> {
                 },
                 text: "Restart",
                 normal: true,
+                context: context,
               ),
             ],
           ),

@@ -1,5 +1,9 @@
+// ignore_for_file: deprecated_member_use
+
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:moderate_project/constants.dart';
 import 'package:moderate_project/services/auth/auth_exceptions.dart';
 import 'package:moderate_project/services/bloc/auth_event.dart';
@@ -17,6 +21,14 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   late final TextEditingController _email;
   late final TextEditingController _password;
+
+  Color get getMyColor {
+    if (Get.isDarkMode) {
+      return Theme.of(context).colorScheme.surface;
+    } else {
+      return Theme.of(context).colorScheme.primary;
+    }
+  }
 
   @override
   void initState() {
@@ -52,53 +64,88 @@ class _LoginPageState extends State<LoginPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Login"),
+          elevation: 0,
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            children: [
-              TextField(
-                controller: _email,
-                autocorrect: false,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  hintText: "Enter Email",
-                ),
+        backgroundColor: Colors.white,
+        body: Container(
+          color: getMyColor,
+          child: Container(
+            padding: const EdgeInsets.all(20.0),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(40.0),
+                topRight: Radius.circular(40.0),
               ),
-              TextField(
-                controller: _password,
-                autocorrect: false,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  hintText: "Enter Password",
-                ),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      TyperAnimatedTextKit(
+                        isRepeatingAnimation: false,
+                        curve: Curves.linear,
+                        speed: const Duration(milliseconds: 180),
+                        text: const ['Login'],
+                        textStyle: TextStyle(
+                          fontSize: 45.0,
+                          fontWeight: FontWeight.w900,
+                          color: Theme.of(context).colorScheme.secondary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  NormalTextField(
+                    controller: _email,
+                    inputType: TextInputType.emailAddress,
+                    labelText: "Email",
+                    validator: null,
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  NormalTextField(
+                    controller: _password,
+                    inputType: TextInputType.visiblePassword,
+                    labelText: "Password",
+                    validator: null,
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  MyButton(
+                    onPress: () {
+                      context
+                          .read<AuthBloc>()
+                          .add(AuthEventLogin(_email.text, _password.text));
+                    },
+                    text: "Login",
+                    normal: true,
+                    context: context,
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  MyButton(
+                    onPress: () {
+                      context
+                          .read<AuthBloc>()
+                          .add(const AuthEventForgotPassword(null));
+                    },
+                    text: "Forgot Password",
+                    normal: true,
+                    context: context,
+                  ),
+                ],
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              MyButton(
-                onPress: () {
-                  context
-                      .read<AuthBloc>()
-                      .add(AuthEventLogin(_email.text, _password.text));
-                },
-                text: "Login",
-                normal: true,
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              MyButton(
-                onPress: () {
-                  context
-                      .read<AuthBloc>()
-                      .add(const AuthEventForgotPassword(null));
-                },
-                text: "Forgot Password",
-                normal: true,
-              ),
-            ],
+            ),
           ),
         ),
       ),

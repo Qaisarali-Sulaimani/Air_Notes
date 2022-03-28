@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:moderate_project/mainUI/homeui.dart';
 import 'package:moderate_project/screens/forgot_password_view.dart';
 import 'package:moderate_project/screens/homescreen.dart';
@@ -22,9 +23,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(),
+      darkTheme: ThemeData.dark(),
+      themeMode: ThemeMode.system,
       home: BlocProvider<AuthBloc>(
         create: (context) => AuthBloc(FirebaseAuthProvider()),
         child: const HomePage(),

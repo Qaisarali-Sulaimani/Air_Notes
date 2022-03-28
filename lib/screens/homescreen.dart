@@ -67,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen>
                     fontSize: 45.0,
                     fontWeight: FontWeight.w900,
                     fontStyle: FontStyle.italic,
+                    color: Colors.white,
                   ),
                 ),
               ],
@@ -80,6 +81,7 @@ class _HomeScreenState extends State<HomeScreen>
               },
               text: "Register",
               normal: true,
+              context: context,
             ),
             const SizedBox(
               height: 8.0,
@@ -90,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen>
               },
               text: "Login",
               normal: true,
+              context: context,
             ),
           ],
         ),

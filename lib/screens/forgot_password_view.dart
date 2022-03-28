@@ -91,6 +91,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 },
                 text: "Send reset link",
                 normal: true,
+                context: context,
               ),
               const SizedBox(
                 height: 10,
@@ -101,6 +102,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 },
                 text: "Back to Login page",
                 normal: true,
+                context: context,
               ),
             ],
           ),

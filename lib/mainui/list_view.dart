@@ -1,32 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:moderate_project/screens/new_note.dart';
 import 'package:moderate_project/services/cloud/cloud_note.dart';
 import 'package:moderate_project/services/cloud/cloud_service.dart';
 import '../constants.dart';
 
-class MyListView extends StatelessWidget {
+class MyListView extends StatefulWidget {
   final Iterable<CloudNote> list;
 
   const MyListView({Key? key, required this.list}) : super(key: key);
 
   @override
+  State<MyListView> createState() => _MyListViewState();
+}
+
+class _MyListViewState extends State<MyListView> {
+  Color get getMyColor {
+    if (Get.isDarkMode) {
+      return Theme.of(context).colorScheme.surface;
+    } else {
+      return Theme.of(context).colorScheme.secondary;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: list.length,
+      itemCount: widget.list.length,
       itemBuilder: (context, index) {
-        if (list.elementAt(index).text.isNotEmpty) {
+        if (widget.list.elementAt(index).text.isNotEmpty) {
           return Card(
+            shape: const StadiumBorder(),
+            color: getMyColor,
             child: ListTile(
+              textColor: Colors.white,
               onTap: () {
                 Navigator.pushNamed(context, NewNote.id,
-                    arguments: list.elementAt(index));
+                    arguments: widget.list.elementAt(index));
               },
               leading: Text(
                 (index + 1).toString(),
                 textScaleFactor: 1.3,
               ),
               title: Text(
-                list.elementAt(index).text,
+                widget.list.elementAt(index).text,
                 maxLines: 1,
                 softWrap: true,
                 overflow: TextOverflow.ellipsis,
@@ -34,6 +51,7 @@ class MyListView extends StatelessWidget {
               ),
               enableFeedback: true,
               trailing: IconButton(
+                color: Colors.white,
                 onPressed: () async {
                   final shouldDelete = await showGenericDialog(
                     context: context,
@@ -49,7 +67,7 @@ class MyListView extends StatelessWidget {
 
                   if (shouldDelete) {
                     FirebaseCloudStorage().deleteNote(
-                        documentId: list.elementAt(index).documentId);
+                        documentId: widget.list.elementAt(index).documentId);
                   }
                 },
                 icon: const Icon(Icons.delete),

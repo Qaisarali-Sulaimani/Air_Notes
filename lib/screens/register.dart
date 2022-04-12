@@ -126,9 +126,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   MyButton(
                     onPress: () {
-                      context
-                          .read<AuthBloc>()
-                          .add(AuthEventRegister(_email.text, _password.text));
+                      context.read<AuthBloc>().add(AuthEventRegister(
+                          _email.text.trimRight(), _password.text.trimRight()));
                     },
                     text: "Register",
                     normal: true,

@@ -122,9 +122,8 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   MyButton(
                     onPress: () {
-                      context
-                          .read<AuthBloc>()
-                          .add(AuthEventLogin(_email.text, _password.text));
+                      context.read<AuthBloc>().add(AuthEventLogin(
+                          _email.text.trimRight(), _password.text.trimRight()));
                     },
                     text: "Login",
                     normal: true,

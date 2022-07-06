@@ -1,4 +1,8 @@
 # Air Notes
 
-A Flutter Project using Cloud Storage of Google's Firebase CloudFirestore and ondevice storage of Sqflite for storing and providing notes that user saves.
-Bloc is used for state management.
+A Flutter Notes taking app with following features:
+
+• Used Firebase for Authentication of users and Cloud Firestore for storing of data.
+• Also used SQL Lite for storing of data on local device.
+• Used BLOC for state management.
+• Provided Toggle dark and light mode by using package GETX
